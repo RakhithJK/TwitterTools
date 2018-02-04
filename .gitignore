@@ -1,3 +1,8 @@
+# gradius ignores
+venv3/
+.idea/
+*.conf
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
