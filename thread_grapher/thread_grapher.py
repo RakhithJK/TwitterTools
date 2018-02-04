@@ -4,6 +4,11 @@
 # It works with the assumption that there are a reasonably stable amount of users being included in thread replies
 # as well as the fact that a single "target" user was included in all the threadzilla replies.
 
+# It makes a few assumptions though:
+# * It's a recent threadzilla, as the standard twitter API only goes back 7 days
+# * There's a steady amount of participants, and you can pick a single individual that will likely be included in all
+#   replies. This is used to collect the twitter replies.
+
 import tweepy
 import configparser
 import networkx as nx
@@ -20,6 +25,10 @@ csecret = config.get('Twitter', 'consumer_secret')
 atoken = config.get('Twitter', 'access_token')
 asecret = config.get('Twitter', 'access_secret')
 
+# Get the configuration for the target user and participant count threshold
+target_user = config.get('Twitter', 'target_user')
+participant_count = config.getint('Twitter', 'participant_count')
+
 # Setup Tweep Auth
 auth = tweepy.OAuthHandler(ckey, csecret)
 auth.set_access_token(atoken, asecret)
@@ -28,14 +37,12 @@ auth.set_access_token(atoken, asecret)
 api = tweepy.API(auth, wait_on_rate_limit=True)
 
 # Collect the target user's (the one hopefully included in most of the threadzilla) reply tweets
-target_user = '0xgradius'
 print("Grabbing results from Twitter API...")
 results = [status for status in tweepy.Cursor(api.search, q=target_user, tweet_mode='extended').items(1000)]
 print("Finished getting Twitter results!")
 
 # Logic gets a bit fuzzy here, we want to filter out any messages that aren't likely a part of the threadzilla
 # participant_count is the rough number of participants in the threadzilla
-participant_count = 30
 
 # Put all the threadzilla replies into a list
 threadzilla_replies = []
